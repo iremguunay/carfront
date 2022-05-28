@@ -7,7 +7,12 @@ import "react-table-6/react-table.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-class Carlist extends Component {
+import AddCar from "./AddCar";
+import EditCar from "./EditCar";
+
+import { CSVLink } from 'react-csv';
+
+class CarList extends Component {
   constructor(props) {
     super(props);
     this.state = { arabalar: [] };
@@ -47,10 +52,45 @@ class Carlist extends Component {
     }
   };
 
+  // Add new car
+  addCar(car) {
+    fetch(SERVER_URL + "/api/car", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(car),
+    })
+      .then((res) => this.fetchCars())
+      .catch((err) => console.error(err));
+  }
+
+  // Update car
+  updateCar(car, link) {
+    fetch(link, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(car),
+    })
+      .then((res) => {
+        toast.success("Changes saved", {
+          position: toast.POSITION.BOTTOM_LEFT,
+        });
+        this.fetchCars();
+      })
+      .catch((err) =>
+        toast.error("Error when saving", {
+          position: toast.POSITION.BOTTOM_LEFT,
+        })
+      );
+  }
+
   render() {
     const columns = [
       {
-        Header: "Marka",
+        Header: "Brand",
         accessor: "brand",
       },
       {
@@ -58,20 +98,35 @@ class Carlist extends Component {
         accessor: "model",
       },
       {
-        Header: "Renk",
+        Header: "Color",
         accessor: "color",
       },
       {
-        Header: "Yıl",
+        Header: "Year",
         accessor: "year",
       },
       {
-        Header: "Kayıt No",
+        Header: "Register No",
         accessor: "registerNumber",
       },
       {
-        Header: "Fiyat €",
+        Header: "Price €",
         accessor: "price",
+      },
+      {
+        sortable: false,
+        filterable: false,
+        width: 100,
+        accessor: "_links.self.href",
+        Cell: ({ value, row }) => (
+          <EditCar
+            car={row}
+            link={value}
+            updateCar={this.updateCar}
+            fetchCars={this.fetchCars}
+          />
+        ),
+        width: 100,
       },
       {
         id: "delbutton",
@@ -85,7 +140,7 @@ class Carlist extends Component {
               this.onDelClick(value);
             }}
           >
-            Sil
+            Delete
           </button>
         ),
       },
@@ -93,14 +148,18 @@ class Carlist extends Component {
 
     return (
       <div className="App">
+        <AddCar addCar={this.addCar} fetchCars={this.fetchCars} />
         <ReactTable
           data={this.state.arabalar}
           columns={columns}
           filterable={true}
+          pageSize={10}
         />
+        <br></br>
+        <CSVLink data={this.state.arabalar} separator=";">Export CSV</CSVLink>
         <ToastContainer autoClose={1500} />
       </div>
     );
   }
 }
-export default Carlist;
+export default CarList;
