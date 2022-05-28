@@ -1,7 +1,11 @@
 import React, { Component } from "react";
 import { SERVER_URL } from "../constants.js";
+
 import ReactTable from "react-table-6";
 import "react-table-6/react-table.css";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 class Carlist extends Component {
   constructor(props) {
@@ -12,7 +16,9 @@ class Carlist extends Component {
   componentDidMount() {
     this.fetchCars();
   }
-  fetchCars = () => { fetch(SERVER_URL + "/api/car")
+
+  fetchCars = () => {
+    fetch(SERVER_URL + "/api/car")
       .then((response) => response.json())
       .then((responseData) => {
         this.setState({
@@ -20,13 +26,25 @@ class Carlist extends Component {
         });
       })
       .catch((err) => console.error(err));
-  }
+  };
 
   // Delete car
   onDelClick = (link) => {
-    fetch(link, { method: "DELETE" })
-      .then((res) => this.fetchCars())
-      .catch((err) => console.error(err));
+    if (window.confirm("Are you sure to delete?")) {
+      fetch(link, { method: "DELETE" })
+        .then((res) => {
+          toast.success("Car deleted", {
+            position: toast.POSITION.BOTTOM_LEFT,
+          });
+          this.fetchCars();
+        })
+        .catch((err) => {
+          toast.error("Error when deleting", {
+            position: toast.POSITION.BOTTOM_LEFT,
+          });
+          console.error(err);
+        });
+    }
   };
 
   render() {
@@ -80,9 +98,9 @@ class Carlist extends Component {
           columns={columns}
           filterable={true}
         />
+        <ToastContainer autoClose={1500} />
       </div>
     );
   }
 }
-
 export default Carlist;
