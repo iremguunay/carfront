@@ -4,6 +4,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+
 const AddCar = (props) => {
   const [open, setOpen] = useState(false);
   const [car, setCar] = useState({
@@ -40,75 +43,79 @@ const AddCar = (props) => {
     props.addCar(car);
     handleClose();
     setCar({
-        brand: "",
-        model: "",
-        color: "",
-        year: "",
-        registerNumber: "",
-        price: "",
-      });
+      brand: "",
+      model: "",
+      color: "",
+      year: "",
+      registerNumber: "",
+      price: "",
+    });
   };
 
   return (
     <div>
-      <button style={{ margin: 10 }} onClick={handleClickOpen}>
+      <Button
+        variant="outlined"
+        color="primary"
+        style={{ margin: 10 }}
+        onClick={handleClickOpen}
+      >
         Add New Car
-      </button>
+      </Button>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>New Car Info</DialogTitle>
         <DialogContent>
-          <input
-            type="text"
-            placeholder="Brand"
+          <TextField
+            autoFocus="true" 
+            fullWidth
+            label="Brand"
             name="brand"
             value={car.brand}
             onChange={handleChange}
           />
-          <br />
-          <input
-            type="text"
-            placeholder="Model"
+          <TextField
+            fullWidth
+            label="Model"
             name="model"
             value={car.model}
             onChange={handleChange}
           />
-          <br />
-          <input
-            type="text"
-            placeholder="Color"
+          <TextField
+            fullWidth
+            label="Color"
             name="color"
             value={car.color}
             onChange={handleChange}
           />
-          <br />
-          <input
-            type="text"
-            placeholder="Year"
+          <TextField
+            fullWidth
+            label="Year"
             name="year"
             value={car.year}
             onChange={handleChange}
           />
-          <br />
-          <input
-            type="text"
-            placeholder="Register No"
+          <TextField
+            fullWidth
+            label="Register No"
             name="registerNumber"
             value={car.registerNumber}
             onChange={handleChange}
           />
-          <br />
-          <input
-            type="text"
-            placeholder="Price €"
+          <TextField
+            fullWidth
+            label="Price"
             name="price"
             value={car.price}
             onChange={handleChange}
           />
-          <br />
         </DialogContent>
         <DialogActions>
-          <button onClick={handleClose}>Cancel</button>
-          <button onClick={handleSave}>Save</button>
+          <Button color="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button color="primary" onClick={handleSave}>
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
     </div>

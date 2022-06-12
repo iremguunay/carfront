@@ -10,7 +10,10 @@ import "react-toastify/dist/ReactToastify.css";
 import AddCar from "./AddCar";
 import EditCar from "./EditCar";
 
-import { CSVLink } from 'react-csv';
+import { CSVLink } from "react-csv";
+
+import Button from "@material-ui/core/Button";
+import Grid from "@material-ui/core/Grid";
 
 class CarList extends Component {
   constructor(props) {
@@ -22,8 +25,14 @@ class CarList extends Component {
     this.fetchCars();
   }
 
+  // Fetch all cars
   fetchCars = () => {
-    fetch(SERVER_URL + "/api/car")
+    // Read the token from the session storage
+    // and include it to Authorization header
+    const token = sessionStorage.getItem("jwt");
+    fetch(SERVER_URL + "/api/car", {
+      headers: { Authorization: token },
+    })
       .then((response) => response.json())
       .then((responseData) => {
         this.setState({
@@ -36,7 +45,11 @@ class CarList extends Component {
   // Delete car
   onDelClick = (link) => {
     if (window.confirm("Are you sure to delete?")) {
-      fetch(link, { method: "DELETE" })
+      const token = sessionStorage.getItem("jwt");
+      fetch(link, {
+        method: "DELETE",
+        headers: { Authorization: token },
+      })
         .then((res) => {
           toast.success("Car deleted", {
             position: toast.POSITION.BOTTOM_LEFT,
@@ -54,10 +67,12 @@ class CarList extends Component {
 
   // Add new car
   addCar(car) {
+    const token = sessionStorage.getItem("jwt");
     fetch(SERVER_URL + "/api/car", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: token,
       },
       body: JSON.stringify(car),
     })
@@ -67,10 +82,12 @@ class CarList extends Component {
 
   // Update car
   updateCar(car, link) {
+    const token = sessionStorage.getItem("jwt");
     fetch(link, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: token,
       },
       body: JSON.stringify(car),
     })
@@ -86,6 +103,25 @@ class CarList extends Component {
         })
       );
   }
+
+  filterCaseInsensitive = (filter, row) => {
+    const id = filter.pivotId || filter.id;
+    const content = row[id];
+    if (typeof content !== "undefined") {
+      // filter by text in the table or if it's a object, filter by key
+      if (typeof content === "object" && content !== null && content.key) {
+        return String(content.key).replace('I','ı').replace('İ','i')
+          .toLowerCase()
+          .includes(filter.value.toLowerCase());
+      } else {
+        return String(content).replace('I','ı').replace('İ','i')
+          .toLowerCase()
+          .includes(filter.value.toLowerCase());
+      }
+    }
+
+    return true;
+  };
 
   render() {
     const columns = [
@@ -126,7 +162,6 @@ class CarList extends Component {
             fetchCars={this.fetchCars}
           />
         ),
-        width: 100,
       },
       {
         id: "delbutton",
@@ -135,28 +170,37 @@ class CarList extends Component {
         width: 100,
         accessor: "_links.self.href",
         Cell: ({ value }) => (
-          <button
+          <Button
+            size="small"
+            color="secondary"
             onClick={() => {
               this.onDelClick(value);
             }}
           >
             Delete
-          </button>
+          </Button>
         ),
       },
     ];
 
     return (
       <div className="App">
-        <AddCar addCar={this.addCar} fetchCars={this.fetchCars} />
+        <Grid container>
+          <Grid item>
+            <AddCar addCar={this.addCar} fetchCars={this.fetchCars} />
+          </Grid>
+          <Grid item style={{ padding: 15 }}>
+            <CSVLink data={this.state.arabalar} separator=";">
+              Export CSV
+            </CSVLink>
+          </Grid>
+        </Grid>
         <ReactTable
           data={this.state.arabalar}
           columns={columns}
           filterable={true}
-          pageSize={10}
+          defaultFilterMethod={this.filterCaseInsensitive}
         />
-        <br></br>
-        <CSVLink data={this.state.arabalar} separator=";">Export CSV</CSVLink>
         <ToastContainer autoClose={1500} />
       </div>
     );
