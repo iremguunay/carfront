@@ -12,8 +12,8 @@ import EditCar from "./EditCar";
 
 import { CSVLink } from "react-csv";
 
-import Button from "@material-ui/core/Button";
-import Grid from "@material-ui/core/Grid";
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
 
 class CarList extends Component {
   constructor(props) {
